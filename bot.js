@@ -51,15 +51,13 @@ bot.on("message", async (msg) => {
       );
     } else if (!text == false && text.includes("/add_games")) {
       const text_clear = text.split(":");
-      const query_team1 = await pool.query(
-        `SELECT * FROM team WHERE id = $1;`,
-        [text_clear[1]]
-      );
-      const query_team2 = await pool.query(
-        `SELECT * FROM team WHERE id = $1;`,
-        [text_clear[2]]
-      );
-      if (query_team1.rows[0] !== null || query_team2.rows[0] !== null) {
+      let query_team1 = await pool.query(`SELECT * FROM team WHERE id = $1;`, [
+        text_clear[1],
+      ]);
+      let query_team2 = await pool.query(`SELECT * FROM team WHERE id = $1;`, [
+        text_clear[2],
+      ]);
+      if (query_team1.rowCount !== 0 && query_team2.rowCount !== 0) {
         const query = await pool.query(
           `INSERT INTO games(team1, team2) VALUES ($1, $2);`,
           [text_clear[1], text_clear[2]]
@@ -131,6 +129,8 @@ bot.on("message", async (msg) => {
           parse_mode: "Markdown",
         });
       } else {
+        let games = getAllGames(pool);
+
         bot.sendMessage(chatId, "❌*Bunday jamoalar topilmadi.*", {
           reply_markup: { keyboard: await games, resize_keyboard: true },
           parse_mode: "Markdown",
@@ -202,42 +202,50 @@ bot.on("message", async (msg) => {
       const gamess = await pool.query(`SELECT * FROM games WHERE id = $1;`, [
         text_clear[1],
       ]);
-      let team1 = await pool.query(`SELECT * FROM team WHERE id = $1;`, [
-        gamess.rows[0].team1,
-      ]);
-      let team2 = await pool.query(`SELECT * FROM team WHERE id = $1;`, [
-        gamess.rows[0].team2,
-      ]);
-      let point1 = await calculateResult(gamess.rows[0].point1);
-      let point2 = await calculateResult(gamess.rows[0].point2);
-      let point3 = await calculateResult(gamess.rows[0].point3);
-      if (point1 !== null && point2 !== null && point3 !== null) {
-        let endPoin1 = point1[0] + point2[0] + point3[0];
-        let endPoin2 = point1[1] + point2[1] + point3[1];
-        const resultQ1 = await pool.query(
-          `UPDATE team SET points = $1 WHERE id= $2;`,
-          [endPoin1, gamess.rows[0].team1]
-        );
-        const resultQ2 = await pool.query(
-          `UPDATE team SET points = $1 WHERE id= $2;`,
-          [endPoin2, gamess.rows[0].team2]
-        );
-        let games = getAllGames(pool);
-        bot.sendMessage(
-          chatId,
-          `🧠*O'yinning yakuniy natijalari:\n\n${team1.rows[0].name}\n1.${team1.rows[0].player1}: ${point1[0]}\n2.${team1.rows[0].player2}: ${point2[0]}\n3.${team1.rows[0].player3}: ${point3[0]}\n\n${team2.rows[0].name}\n1.${team2.rows[0].player1}: ${point1[1]}\n2.${team2.rows[0].player2}: ${point2[1]}\n3.${team2.rows[0].player3}: ${point3[1]}*`,
-          {
+      if (gamess.rowCount !== 0) {
+        let team1 = await pool.query(`SELECT * FROM team WHERE id = $1;`, [
+          gamess.rows[0].team1,
+        ]);
+        let team2 = await pool.query(`SELECT * FROM team WHERE id = $1;`, [
+          gamess.rows[0].team2,
+        ]);
+        let point1 = await calculateResult(gamess.rows[0].point1);
+        let point2 = await calculateResult(gamess.rows[0].point2);
+        let point3 = await calculateResult(gamess.rows[0].point3);
+        if (point1 !== null && point2 !== null && point3 !== null) {
+          let endPoin1 = point1[0] + point2[0] + point3[0];
+          let endPoin2 = point1[1] + point2[1] + point3[1];
+          const resultQ1 = await pool.query(
+            `UPDATE team SET points = $1 WHERE id= $2;`,
+            [endPoin1, gamess.rows[0].team1]
+          );
+          const resultQ2 = await pool.query(
+            `UPDATE team SET points = $1 WHERE id= $2;`,
+            [endPoin2, gamess.rows[0].team2]
+          );
+          let games = getAllGames(pool);
+          bot.sendMessage(
+            chatId,
+            `🧠*O'yinning yakuniy natijalari:\n\n${team1.rows[0].name}\n1.${team1.rows[0].player1}: ${point1[0]}\n2.${team1.rows[0].player2}: ${point2[0]}\n3.${team1.rows[0].player3}: ${point3[0]}\n\n${team2.rows[0].name}\n1.${team2.rows[0].player1}: ${point1[1]}\n2.${team2.rows[0].player2}: ${point2[1]}\n3.${team2.rows[0].player3}: ${point3[1]}*`,
+            {
+              reply_markup: { keyboard: await games, resize_keyboard: true },
+              parse_mode: "Markdown",
+            }
+          );
+          const endQ = await pool.query(
+            `UPDATE games SET ended = true WHERE id = $1;`,
+            [text_clear[1]]
+          );
+        } else {
+          let games = getAllGames(pool);
+          bot.sendMessage(chatId, "😬*Natijalar kiritilmagan*", {
             reply_markup: { keyboard: await games, resize_keyboard: true },
             parse_mode: "Markdown",
-          }
-        );
-        const endQ = await pool.query(
-          `UPDATE games SET ended = true WHERE id = $1;`,
-          [text_clear[1]]
-        );
+          });
+        }
       } else {
         let games = getAllGames(pool);
-        bot.sendMessage(chatId, "😬*Natijalar kiritilmagan*", {
+        bot.sendMessage(chatId, "😬*Bunday o'yin topilmadi*", {
           reply_markup: { keyboard: await games, resize_keyboard: true },
           parse_mode: "Markdown",
         });

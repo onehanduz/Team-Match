@@ -30,21 +30,25 @@ const getAllGames = async (pool) => {
   let query1;
   let query2;
   let arr = [];
-  for (const iterator of query.rows) {
-    query1 = await pool.query("SELECT * FROM team WHERE id = $1;", [
-      iterator.team1,
-    ]);
-    query2 = await pool.query("SELECT * FROM team WHERE id = $1;", [
-      iterator.team2,
-    ]);
-    arr.push([
-      "/game:" +
-        query1.rows[0].name +
-        "🆚" +
-        query2.rows[0].name +
-        ":" +
-        iterator.id,
-    ]);
+  if (query.rowCount !== 0) {
+    for (const iterator of query.rows) {
+      query1 = await pool.query("SELECT * FROM team WHERE id = $1;", [
+        iterator.team1,
+      ]);
+      query2 = await pool.query("SELECT * FROM team WHERE id = $1;", [
+        iterator.team2,
+      ]);
+      if (query1.rowCount !== 0 && query2.rowCount !== 0) {
+        arr.push([
+          "/game:" +
+            query1.rows[0].name +
+            "🆚" +
+            query2.rows[0].name +
+            ":" +
+            iterator.id,
+        ]);
+      }
+    }
   }
   arr.push([data]);
   return arr;
