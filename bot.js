@@ -130,7 +130,7 @@ bot.on("message", async (msg) => {
             `INSERT INTO games(team1, team2) VALUES ($1, $2);`,
             [text_clear[1], text_clear[2]]
           );
-          let gamess = "🧠*O'yin*: \n\n";
+          let gamess = `🧠 *O'yin*: \n*${query_team1.rows[0].name} vs ${query_team2.rows[0].name}* \n\n`;
           if (text_clear[3] == "7") {
             let game1 = dicepRandom();
             let game2 = dicepRandom(game1);
@@ -204,17 +204,9 @@ bot.on("message", async (msg) => {
             parse_mode: "Markdown",
           });
         } else {
-          if (chatId == groupId) {
-            bot.sendMessage(chatId, "❌*Bunday jamoalar topilmadi.*", {
-              parse_mode: "Markdown",
-            });
-          } else {
-            let games = getAllGames(pool);
-            bot.sendMessage(chatId, "❌*Bunday jamoalar topilmadi.*", {
-              reply_markup: { keyboard: await games, resize_keyboard: true },
-              parse_mode: "Markdown",
-            });
-          }
+          bot.sendMessage(chatId, "❌*Bunday jamoalar topilmadi.*", {
+            parse_mode: "Markdown",
+          });
         }
       } else {
         bot.sendMessage(chatId, "❌*Xato.*", {
@@ -254,7 +246,24 @@ bot.on("message", async (msg) => {
               }
             );
           }
+          bot.sendMessage(
+            chatId,
+            "*O'yinni o'chirish uchun* `/del_game:" +
+              games_query.rows[0].id +
+              "`",
+            {
+              parse_mode: "Markdown",
+            }
+          );
         }
+      } else {
+        bot.sendMessage(
+          chatId,
+          "😬*Bunday o'yin topilmadi, tugatilmagan yoki ID xato kiritildi.*",
+          {
+            parse_mode: "Markdown",
+          }
+        );
       }
     } else if (!text == false && text.includes("/result")) {
       const text_clear = text.split(":");
@@ -295,95 +304,122 @@ bot.on("message", async (msg) => {
       }
     } else if (!text == false && text.includes("/end")) {
       const text_clear = text.split(":");
-      const gamess = await pool.query(
-        `SELECT * FROM games WHERE id = $1 AND ended=FALSE;`,
-        [text_clear[1]]
-      );
-      if (gamess.rowCount !== 0) {
-        let team1 = await pool.query(`SELECT * FROM team WHERE id = $1;`, [
-          gamess.rows[0].team1,
-        ]);
-        let team2 = await pool.query(`SELECT * FROM team WHERE id = $1;`, [
-          gamess.rows[0].team2,
-        ]);
-        let point1 = await calculateResult(gamess.rows[0].point1);
-        let point2 = await calculateResult(gamess.rows[0].point2);
-        let point3 = await calculateResult(gamess.rows[0].point3);
-        if (point1 !== null && point2 !== null && point3 !== null) {
-          let team1Points = await pool.query(
-            `SELECT points FROM team WHERE id = $1;`,
-            [gamess.rows[0].team1]
-          );
-          let team2Points = await pool.query(
-            `SELECT points FROM team WHERE id = $1;`,
-            [gamess.rows[0].team2]
-          );
-          let endPoin1 =
-            point1[0] +
-            point2[0] +
-            point3[0] +
-            parseInt(await team1Points.rows[0].points);
-          let endPoin2 =
-            point1[1] +
-            point2[1] +
-            point3[1] +
-            parseInt(await team2Points.rows[0].points);
-          const resultQ1 = await pool.query(
-            `UPDATE team SET points = $1 WHERE id= $2;`,
-            [parseInt(endPoin1), gamess.rows[0].team1]
-          );
-          const resultQ2 = await pool.query(
-            `UPDATE team SET points = $1 WHERE id= $2;`,
-            [parseInt(endPoin2), gamess.rows[0].team2]
-          );
-          let games = getAllGames(pool);
+      if (text_clear.length == 2) {
+        const gamess = await pool.query(
+          `SELECT * FROM games WHERE id = $1 AND ended=FALSE;`,
+          [text_clear[1]]
+        );
+        if (gamess.rowCount !== 0) {
+          let team1 = await pool.query(`SELECT * FROM team WHERE id = $1;`, [
+            gamess.rows[0].team1,
+          ]);
+          let team2 = await pool.query(`SELECT * FROM team WHERE id = $1;`, [
+            gamess.rows[0].team2,
+          ]);
+          let point1 = await calculateResult(gamess.rows[0].point1);
+          let point2 = await calculateResult(gamess.rows[0].point2);
+          let point3 = await calculateResult(gamess.rows[0].point3);
+          if (point1 !== null && point2 !== null && point3 !== null) {
+            let team1Points = await pool.query(
+              `SELECT points FROM team WHERE id = $1;`,
+              [gamess.rows[0].team1]
+            );
+            let team2Points = await pool.query(
+              `SELECT points FROM team WHERE id = $1;`,
+              [gamess.rows[0].team2]
+            );
+            let endPoin1 =
+              point1[0] +
+              point2[0] +
+              point3[0] +
+              parseInt(await team1Points.rows[0].points);
+            let endPoin2 =
+              point1[1] +
+              point2[1] +
+              point3[1] +
+              parseInt(await team2Points.rows[0].points);
+            const resultQ1 = await pool.query(
+              `UPDATE team SET points = $1 WHERE id= $2;`,
+              [parseInt(endPoin1), gamess.rows[0].team1]
+            );
+            const resultQ2 = await pool.query(
+              `UPDATE team SET points = $1 WHERE id= $2;`,
+              [parseInt(endPoin2), gamess.rows[0].team2]
+            );
+            let games = getAllGames(pool);
+            bot.sendMessage(
+              chatId,
+              `🧠*O'yinning yakuniy natijalari:\n\n${team1.rows[0].name}\n1.${team1.rows[0].player1}: ${point1[0]}\n2.${team1.rows[0].player2}: ${point2[0]}\n3.${team1.rows[0].player3}: ${point3[0]}\n\n${team2.rows[0].name}\n1.${team2.rows[0].player1}: ${point1[1]}\n2.${team2.rows[0].player2}: ${point2[1]}\n3.${team2.rows[0].player3}: ${point3[1]}*`,
+              {
+                parse_mode: "Markdown",
+              }
+            );
+            const endQ = await pool.query(
+              `UPDATE games SET ended = TRUE WHERE id = $1;`,
+              [text_clear[1]]
+            );
+          } else {
+            bot.sendMessage(chatId, "😬*Natijalar kiritilmagan*", {
+              parse_mode: "Markdown",
+            });
+          }
+        } else {
           bot.sendMessage(
             chatId,
-            `🧠*O'yinning yakuniy natijalari:\n\n${team1.rows[0].name}\n1.${team1.rows[0].player1}: ${point1[0]}\n2.${team1.rows[0].player2}: ${point2[0]}\n3.${team1.rows[0].player3}: ${point3[0]}\n\n${team2.rows[0].name}\n1.${team2.rows[0].player1}: ${point1[1]}\n2.${team2.rows[0].player2}: ${point2[1]}\n3.${team2.rows[0].player3}: ${point3[1]}*`,
+            "😬*Bunday o'yin topilmadi, tugatilgan yoki ID xato kiritildi. O'yinni qayta natija kiritiladigan qilish uchun /open:O'yin IDsini kiriting \nNamuna: *`/open:1`",
             {
               parse_mode: "Markdown",
             }
           );
-          const endQ = await pool.query(
-            `UPDATE games SET ended = TRUE WHERE id = $1;`,
-            [text_clear[1]]
-          );
-        } else {
-          bot.sendMessage(chatId, "😬*Natijalar kiritilmagan*", {
-            parse_mode: "Markdown",
-          });
         }
-      } else {
-        bot.sendMessage(
-          chatId,
-          "😬*Bunday o'yin topilmadi, tugatilgan yoki ID xato kiritildi. O'yinni qayta natija kiritiladigan qilish uchun /open:O'yin IDsini kiriting \nNamuna: *`/open:1`",
-          {
-            parse_mode: "Markdown",
-          }
-        );
       }
     } else if (!text == false && text.includes("/open")) {
       const text_clear = text.split(":");
-      const gamess = await pool.query(
-        `SELECT * FROM games WHERE id = $1 AND ended=TRUE;`,
-        [text_clear[1]]
-      );
-      if (gamess.rowCount !== 0) {
-        const endQ = await pool.query(
-          `UPDATE games SET ended = FALSE WHERE id = $1;`,
+      if (text_clear.length == 2) {
+        const gamess = await pool.query(
+          `SELECT * FROM games WHERE id = $1 AND ended=TRUE;`,
           [text_clear[1]]
         );
-        bot.sendMessage(chatId, "✅*O'yin ochildi.*", {
-          parse_mode: "Markdown",
-        });
-      } else {
-        bot.sendMessage(
-          chatId,
-          "😬*Bunday o'yin topilmadi, tugatilmagan yoki ID xato kiritildi.*",
-          {
+        if (gamess.rowCount !== 0) {
+          const endQ = await pool.query(
+            `UPDATE games SET ended = FALSE WHERE id = $1;`,
+            [text_clear[1]]
+          );
+          bot.sendMessage(chatId, "✅*O'yin ochildi.*", {
             parse_mode: "Markdown",
-          }
-        );
+          });
+        } else {
+          bot.sendMessage(
+            chatId,
+            "😬*Bunday o'yin topilmadi, tugatilmagan yoki ID xato kiritildi.*",
+            {
+              parse_mode: "Markdown",
+            }
+          );
+        }
+      }
+    } else if (!text == false && text.includes("/del_game")) {
+      const text_clear = text.split(":");
+      if (text_clear.length == 2 && text_clear[1] !== "") {
+        const gamess = await pool.query(`SELECT * FROM games WHERE id = $1;`, [
+          text_clear[1],
+        ]);
+        if (gamess.rowCount !== 0) {
+          const endQ = await pool.query(`DELETE FROM games WHERE id = $1;`, [
+            text_clear[1],
+          ]);
+          bot.sendMessage(chatId, "✅*O'yin ochirildi.*", {
+            parse_mode: "Markdown",
+          });
+        } else {
+          bot.sendMessage(
+            chatId,
+            "😬*Bunday o'yin topilmadi, ID xato kiritildi.*",
+            {
+              parse_mode: "Markdown",
+            }
+          );
+        }
       }
 
       /////Jamoalar
@@ -428,20 +464,21 @@ bot.on("message", async (msg) => {
         });
       }
     } else if (!text == false && text.includes("/del_team")) {
-      const text_clear = text.split(":")[1];
-      const query = await pool.query(`DELETE FROM team WHERE id = $1;`, [
-        text_clear,
-      ]);
-      const query2 = await pool.query(`DELETE FROM games WHERE team1 = $1;`, [
-        text_clear,
-      ]);
-      const query3 = await pool.query(`DELETE FROM games WHERE team2 = $1;`, [
-        text_clear,
-      ]);
-      let group = getAllTeam(pool);
-      bot.sendMessage(chatId, "✅*Jamoa o'chirildi*", {
-        parse_mode: "Markdown",
-      });
+      const text_clear = text.split(":");
+      if (text_clear.length == 2 && text_clear[1] !== "") {
+        const query = await pool.query(`DELETE FROM team WHERE id = $1;`, [
+          text_clear[1],
+        ]);
+        const query2 = await pool.query(`DELETE FROM games WHERE team1 = $1;`, [
+          text_clear[1],
+        ]);
+        const query3 = await pool.query(`DELETE FROM games WHERE team2 = $1;`, [
+          text_clear[1],
+        ]);
+        bot.sendMessage(chatId, "✅*Jamoa o'chirildi*", {
+          parse_mode: "Markdown",
+        });
+      }
     } else if (!text == false && text.includes("/team")) {
       const text_clear = text.split(":");
       const query = await pool.query(`SELECT * FROM team WHERE id = $1;`, [
@@ -463,6 +500,13 @@ bot.on("message", async (msg) => {
           }
         );
       }
+    }
+  } else {
+    if (chatId !== groupId) {
+      bot.sendMessage(
+        chatId,
+        "Sizda botdan to'laqonli foydalanish uchun ruxsat yo'q. ruhsat olish uchun @Gafurov_Abdurasul va @onehand_1 ga murojaat qiling."
+      );
     }
   }
 });
