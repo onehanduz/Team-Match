@@ -4,7 +4,8 @@
   "description": "",
   "main": "bot.js",
   "scripts": {
-    "start": "pm2 start bot.js"
+    "start": "pm2 start bot.js --name bot",
+    "restart": "pm2 restart bot"
   },
   "keywords": [],
   "author": "",

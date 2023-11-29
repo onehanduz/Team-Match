@@ -1,6 +1,8 @@
 const TelegramBot = require("node-telegram-bot-api");
 const fs = require("fs");
 const dotenv = require("dotenv").config();
+const exec = require("child_process").exec;
+
 let {
   main,
   cancel,
@@ -10,6 +12,7 @@ let {
 } = require("./src/key/keyArray");
 const token = process.env.BOT_TOKEN;
 const pool = require("./src/db");
+const { dir } = require("console");
 const bot = new TelegramBot(token, { polling: true });
 
 bot.on("message", async (msg) => {
@@ -537,3 +540,10 @@ function dicepRandom(old, old_old, old2, old3) {
     ? dicepRandom(old, old_old, old2, old3)
     : num;
 }
+bot.on("polling_error", () => {
+  exec("npm run restart", function (err, stdout, stderr) {
+    if (err) {
+    }
+    console.log(stdout);
+  });
+});
