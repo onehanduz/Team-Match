@@ -59,7 +59,7 @@ bot.on("message", async (msg) => {
         `SELECT * FROM team WHERE id = $1;`,
         [text_clear[2]]
       );
-      if (query_team1.rows !== null || query_team2.rows !== null) {
+      if (query_team1.rows[0] !== null || query_team2.rows[0] !== null) {
         const query = await pool.query(
           `INSERT INTO games(team1, team2) VALUES ($1, $2);`,
           [text_clear[1], text_clear[2]]
