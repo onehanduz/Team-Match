@@ -1,14 +1,13 @@
 const TelegramBot = require("node-telegram-bot-api");
 const fs = require("fs");
-const dotenv = require("dotenv");
+const dotenv = require("dotenv").config();
 let {
   main,
   cancel,
-  getAllTeam,
   diceplines,
+  getAllTeam,
   getAllGames,
 } = require("./src/key/keyArray");
-dotenv.config();
 const token = process.env.BOT_TOKEN;
 const pool = require("./src/db");
 const bot = new TelegramBot(token, { polling: true });
@@ -36,7 +35,7 @@ bot.on("message", async (msg) => {
       });
     } else if (text == "O'yin yaratish") {
       const query = await pool.query("SELECT * FROM team");
-      let data = "Jamolar⤵️:";
+      let data = "*Jamoalar*⤵️:";
       for (const iterator of query.rows) {
         data =
           data + `\n\n👥*Nomi*:${iterator.name}\n🆔:\`\`${iterator.id}\`\``;
@@ -52,10 +51,6 @@ bot.on("message", async (msg) => {
       );
     } else if (!text == false && text.includes("/add_games")) {
       const text_clear = text.split(":");
-      const query = await pool.query(
-        `INSERT INTO games(team1, team2) VALUES ($1, $2);`,
-        [text_clear[1], text_clear[2]]
-      );
       const query_team1 = await pool.query(
         `SELECT * FROM team WHERE id = $1;`,
         [text_clear[1]]
@@ -64,71 +59,83 @@ bot.on("message", async (msg) => {
         `SELECT * FROM team WHERE id = $1;`,
         [text_clear[2]]
       );
-      let gamess = "";
-      if (text_clear[3] == "7") {
-        gamess =
-          "*" +
-          query_team1.rows[0].player1 +
-          " 🆚 " +
-          query_team2.rows[0].player1 +
-          " " +
-          diceplines[Math.floor(Math.random() * 6)] +
-          "\n" +
-          query_team1.rows[0].player1 +
-          " 🆚 " +
-          query_team2.rows[0].player2 +
-          " " +
-          diceplines[Math.floor(Math.random() * 6)] +
-          "\n" +
-          query_team1.rows[0].player1 +
-          " 🆚 " +
-          query_team2.rows[0].player3 +
-          " " +
-          diceplines[Math.floor(Math.random() * 6)] +
-          "\n" +
-          query_team1.rows[0].player2 +
-          " 🆚 " +
-          query_team2.rows[0].player1 +
-          " " +
-          diceplines[Math.floor(Math.random() * 6)] +
-          "\n" +
-          query_team1.rows[0].player2 +
-          " 🆚 " +
-          query_team2.rows[0].player2 +
-          " " +
-          diceplines[Math.floor(Math.random() * 6)] +
-          "\n" +
-          query_team1.rows[0].player2 +
-          " 🆚 " +
-          query_team2.rows[0].player3 +
-          " " +
-          diceplines[Math.floor(Math.random() * 6)] +
-          "\n" +
-          query_team1.rows[0].player3 +
-          " 🆚 " +
-          query_team2.rows[0].player1 +
-          " " +
-          diceplines[Math.floor(Math.random() * 6)] +
-          "\n" +
-          query_team1.rows[0].player3 +
-          " 🆚 " +
-          query_team2.rows[0].player2 +
-          " " +
-          diceplines[Math.floor(Math.random() * 6)] +
-          "\n" +
-          query_team1.rows[0].player3 +
-          " 🆚 " +
-          query_team2.rows[0].player3 +
-          " " +
-          diceplines[Math.floor(Math.random() * 6)] +
-          "\n" +
-          "*";
+      if (query_team1.rows !== null || query_team2.rows !== null) {
+        const query = await pool.query(
+          `INSERT INTO games(team1, team2) VALUES ($1, $2);`,
+          [text_clear[1], text_clear[2]]
+        );
+        let gamess = "🧠*O'yin*: \n\n";
+        if (text_clear[3] == "7") {
+          gamess =
+            gamess +
+            "*" +
+            query_team1.rows[0].player1 +
+            " 🆚 " +
+            query_team2.rows[0].player1 +
+            " " +
+            diceplines[Math.floor(Math.random() * 6)] +
+            "\n" +
+            query_team1.rows[0].player1 +
+            " 🆚 " +
+            query_team2.rows[0].player2 +
+            " " +
+            diceplines[Math.floor(Math.random() * 6)] +
+            "\n" +
+            query_team1.rows[0].player1 +
+            " 🆚 " +
+            query_team2.rows[0].player3 +
+            " " +
+            diceplines[Math.floor(Math.random() * 6)] +
+            "\n" +
+            query_team1.rows[0].player2 +
+            " 🆚 " +
+            query_team2.rows[0].player1 +
+            " " +
+            diceplines[Math.floor(Math.random() * 6)] +
+            "\n" +
+            query_team1.rows[0].player2 +
+            " 🆚 " +
+            query_team2.rows[0].player2 +
+            " " +
+            diceplines[Math.floor(Math.random() * 6)] +
+            "\n" +
+            query_team1.rows[0].player2 +
+            " 🆚 " +
+            query_team2.rows[0].player3 +
+            " " +
+            diceplines[Math.floor(Math.random() * 6)] +
+            "\n" +
+            query_team1.rows[0].player3 +
+            " 🆚 " +
+            query_team2.rows[0].player1 +
+            " " +
+            diceplines[Math.floor(Math.random() * 6)] +
+            "\n" +
+            query_team1.rows[0].player3 +
+            " 🆚 " +
+            query_team2.rows[0].player2 +
+            " " +
+            diceplines[Math.floor(Math.random() * 6)] +
+            "\n" +
+            query_team1.rows[0].player3 +
+            " 🆚 " +
+            query_team2.rows[0].player3 +
+            " " +
+            diceplines[Math.floor(Math.random() * 6)] +
+            "\n" +
+            "*";
+        }
+        let games = getAllGames(pool);
+        bot.sendMessage(chatId, gamess, {
+          reply_markup: { keyboard: await games, resize_keyboard: true },
+          parse_mode: "Markdown",
+        });
+      } else {
+        bot.sendMessage(chatId, "❌*Bunday jamoalar topilmadi.*", {
+          reply_markup: { keyboard: await games, resize_keyboard: true },
+          parse_mode: "Markdown",
+        });
       }
-      let games = getAllGames(pool);
-      bot.sendMessage(chatId, "🧠*O'yin*: \n\n" + gamess, {
-        reply_markup: { keyboard: await games, resize_keyboard: true },
-        parse_mode: "Markdown",
-      });
     } else if (!text == false && text.includes("/game")) {
       const text_clear = text.split(":");
       const games_query = await pool.query(
@@ -152,37 +159,44 @@ bot.on("message", async (msg) => {
       );
     } else if (!text == false && text.includes("/result")) {
       const text_clear = text.split(":");
-      let point =
-        text_clear[3] +
-        ":" +
-        text_clear[4] +
-        "/" +
-        text_clear[5] +
-        ":" +
-        text_clear[6];
-      if (text_clear[2] == 1) {
-        const pointQ = await pool.query(
-          `UPDATE games SET point1 = $1 WHERE id= $2;`,
-          [point, text_clear[1]]
-        );
+      if (text_clear.length == 7) {
+        let point =
+          text_clear[3] +
+          ":" +
+          text_clear[4] +
+          "/" +
+          text_clear[5] +
+          ":" +
+          text_clear[6];
+        if (text_clear[2] == 1) {
+          const pointQ = await pool.query(
+            `UPDATE games SET point1 = $1 WHERE id= $2;`,
+            [point, text_clear[1]]
+          );
+        }
+        if (text_clear[2] == 2) {
+          const pointQ = await pool.query(
+            `UPDATE games SET point2 = $1 WHERE id= $2;`,
+            [point, text_clear[1]]
+          );
+        }
+        if (text_clear[2] == 3) {
+          const pointQ = await pool.query(
+            `UPDATE games SET point3 = $1 WHERE id= $2;`,
+            [point, text_clear[1]]
+          );
+        }
+        let games = getAllGames(pool);
+        bot.sendMessage(chatId, `✅*Natija kiritildi.*`, {
+          reply_markup: { keyboard: await games, resize_keyboard: true },
+          parse_mode: "Markdown",
+        });
+      } else {
+        bot.sendMessage(chatId, `❌*Natija kiritishda xatolik.*`, {
+          reply_markup: { keyboard: await games, resize_keyboard: true },
+          parse_mode: "Markdown",
+        });
       }
-      if (text_clear[2] == 2) {
-        const pointQ = await pool.query(
-          `UPDATE games SET point2 = $1 WHERE id= $2;`,
-          [point, text_clear[1]]
-        );
-      }
-      if (text_clear[2] == 3) {
-        const pointQ = await pool.query(
-          `UPDATE games SET point3 = $1 WHERE id= $2;`,
-          [point, text_clear[1]]
-        );
-      }
-      let games = getAllGames(pool);
-      bot.sendMessage(chatId, `✅*Natija kiritildi.*`, {
-        reply_markup: { keyboard: await games, resize_keyboard: true },
-        parse_mode: "Markdown",
-      });
     } else if (!text == false && text.includes("/end")) {
       const text_clear = text.split(":");
       const gamess = await pool.query(`SELECT * FROM games WHERE id = $1;`, [
