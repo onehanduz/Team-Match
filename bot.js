@@ -136,11 +136,11 @@ bot.on("message", async (msg) => {
             let game2 = dicepRandom(game1);
             let game3 = dicepRandom(game1, game2);
             let game4 = dicepRandom(game1);
-            let game5 = dicepRandom(game2);
-            let game6 = dicepRandom(game3);
+            let game5 = dicepRandom(game2, game4);
+            let game6 = dicepRandom(game3, game4, game5);
             let game7 = dicepRandom(game1, game4);
-            let game8 = dicepRandom(game2, game5);
-            let game9 = dicepRandom(game3, game6);
+            let game8 = dicepRandom(game2, game5, game7);
+            let game9 = dicepRandom(game3, game6, game7, game8);
             gamess =
               gamess +
               "*1." +
@@ -490,9 +490,13 @@ const calculateResult = async (point) => {
     return null;
   }
 };
-function dicepRandom(old, old_old) {
+function dicepRandom(old, old_old, old2, old3) {
   if (old == null) old = 10;
   if (old_old == null) old_old = 10;
+  if (old2 == null) old2 = 10;
+  if (old3 == null) old3 = 10;
   let num = Math.floor(Math.random() * 6);
-  return num == old || num == old_old ? dicepRandom(old, old_old) : num;
+  return num == old || num == old_old || num == old2 || num == old3
+    ? dicepRandom(old, old_old, old2, old3)
+    : num;
 }
