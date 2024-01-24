@@ -25,15 +25,23 @@ bot.on("message", async (msg) => {
         reply_markup: { keyboard: main, resize_keyboard: true },
         parse_mode: "Markdown",
       });
-
+    } else if (text == "Buyruqlar" || text == "/commands") {
+      let games = getAllGames(pool);
+      bot.sendMessage(
+        chatId,
+        "*Hamma buyruqlar*⤵️:\n\n/games - Tugatilmagan o'yinlarni ko'rish uchun\n/create_game - O'yin yaratish uchun ma'lumotlar\n/add_game:ID:ID - O'yin qo'shish uchun\n/game:Team🆚Team:ID - 1ta o'yinni ko'rish uchun\n/result:ID:Number:Number:Number:Number:Number:Number - natijalarni kiritish\n/end:ID - O'yinni tugatish\n/all_team - Hamma jamoalarni ko'rish\n/create_team - Jamoa qo'shish haqida ma'lumot\n/add_team:Text.Text.Text.Text - Jamoa qo'shish\n/del_team:ID - Jamoani o'chirish\n/team:Text:ID - Jamoani ko'rish",
+        {
+          parse_mode: "Markdown",
+        }
+      );
       //O'yinlar
-    } else if (text == "O'yinlar") {
+    } else if (text == "O'yinlar" || text == "/games") {
       let games = getAllGames(pool);
       bot.sendMessage(chatId, "*Tugamagan o'yinlar*⤵️:", {
         reply_markup: { keyboard: await games, resize_keyboard: true },
         parse_mode: "Markdown",
       });
-    } else if (text == "O'yin yaratish") {
+    } else if (text == "O'yin yaratish" || text == "/create_game") {
       const query = await pool.query("SELECT * FROM team");
       let data = "*Jamoalar*⤵️:";
       for (const iterator of query.rows) {
@@ -43,13 +51,13 @@ bot.on("message", async (msg) => {
       bot.sendMessage(
         chatId,
         data +
-          "\n\n📃*Yo'nalishlar*: 7-Random\n\n❗️*O'yin qo'shish uchun: /add_games:1-jamoa 🆔si:2-jamoa 🆔si:yo'nalish raqami*\n\n⁉️*Namuna:* `/add_games:1:2:7`",
+          "\n\n📃*Yo'nalishlar*: 7-Random\n\n❗️*O'yin qo'shish uchun: /add_game:1-jamoa 🆔si:2-jamoa 🆔si:yo'nalish raqami*\n\n⁉️*Namuna:* `/add_game:1:2:7`",
         {
           reply_markup: { keyboard: main, resize_keyboard: true },
           parse_mode: "Markdown",
         }
       );
-    } else if (!text == false && text.includes("/add_games")) {
+    } else if (!text == false && text.includes("/add_game")) {
       const text_clear = text.split(":");
       let query_team1 = await pool.query(`SELECT * FROM team WHERE id = $1;`, [
         text_clear[1],
@@ -199,9 +207,10 @@ bot.on("message", async (msg) => {
       }
     } else if (!text == false && text.includes("/end")) {
       const text_clear = text.split(":");
-      const gamess = await pool.query(`SELECT * FROM games WHERE id = $1;`, [
-        text_clear[1],
-      ]);
+      const gamess = await pool.query(
+        `SELECT * FROM games WHERE id = $1 AND ended=FALSE;`,
+        [text_clear[1]]
+      );
       if (gamess.rowCount !== 0) {
         let team1 = await pool.query(`SELECT * FROM team WHERE id = $1;`, [
           gamess.rows[0].team1,
@@ -213,15 +222,31 @@ bot.on("message", async (msg) => {
         let point2 = await calculateResult(gamess.rows[0].point2);
         let point3 = await calculateResult(gamess.rows[0].point3);
         if (point1 !== null && point2 !== null && point3 !== null) {
-          let endPoin1 = point1[0] + point2[0] + point3[0];
-          let endPoin2 = point1[1] + point2[1] + point3[1];
+          let team1Points = await pool.query(
+            `SELECT points FROM team WHERE id = $1;`,
+            [gamess.rows[0].team1]
+          );
+          let team2Points = await pool.query(
+            `SELECT points FROM team WHERE id = $1;`,
+            [gamess.rows[0].team2]
+          );
+          let endPoin1 =
+            point1[0] +
+            point2[0] +
+            point3[0] +
+            parseInt(await team1Points.rows[0].points);
+          let endPoin2 =
+            point1[1] +
+            point2[1] +
+            point3[1] +
+            parseInt(await team2Points.rows[0].points);
           const resultQ1 = await pool.query(
             `UPDATE team SET points = $1 WHERE id= $2;`,
-            [endPoin1, gamess.rows[0].team1]
+            [parseInt(endPoin1), gamess.rows[0].team1]
           );
           const resultQ2 = await pool.query(
             `UPDATE team SET points = $1 WHERE id= $2;`,
-            [endPoin2, gamess.rows[0].team2]
+            [parseInt(endPoin2), gamess.rows[0].team2]
           );
           let games = getAllGames(pool);
           bot.sendMessage(
@@ -245,20 +270,24 @@ bot.on("message", async (msg) => {
         }
       } else {
         let games = getAllGames(pool);
-        bot.sendMessage(chatId, "😬*Bunday o'yin topilmadi*", {
-          reply_markup: { keyboard: await games, resize_keyboard: true },
-          parse_mode: "Markdown",
-        });
+        bot.sendMessage(
+          chatId,
+          "😬*Bunday o'yin topilmadi, tugatilgan yoki ID xato kiritildi.*",
+          {
+            reply_markup: { keyboard: await games, resize_keyboard: true },
+            parse_mode: "Markdown",
+          }
+        );
       }
 
       /////Jamoalar
-    } else if (text == "Jamoalar") {
+    } else if (text == "Jamoalar" || text == "/all_team") {
       let group = getAllTeam(pool);
       bot.sendMessage(chatId, "👥*Jamoalar:*", {
         reply_markup: { keyboard: await group, resize_keyboard: true },
         parse_mode: "Markdown",
       });
-    } else if (text == "Jamoa qo'shish") {
+    } else if (text == "Jamoa qo'shish" || text == "/create_team") {
       bot.sendMessage(
         chatId,
         "❗️<b>Jamoa haqidagi ma'lumotlarni quyidagi foramatda kiriting. Quyidagi formatda: /add_team:Jamoa nomi.Player1.Player2.Player3.Points \n\n⁉️Namuna:</b> /add_team:Chempions.Alex Mullen.Andrea Muzii.Katie Kermode.0",
