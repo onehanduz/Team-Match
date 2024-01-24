@@ -29,7 +29,7 @@ bot.on("message", async (msg) => {
       let games = getAllGames(pool);
       bot.sendMessage(
         chatId,
-        "*Hamma buyruqlar*⤵️:\n\n/games - Tugatilmagan o'yinlarni ko'rish uchun\n/create_game - O'yin yaratish uchun ma'lumotlar\n/add_game:ID:ID - O'yin qo'shish uchun\n/game:Team🆚Team:ID - 1ta o'yinni ko'rish uchun\n/result:ID:Number:Number:Number:Number:Number:Number - natijalarni kiritish\n/end:ID - O'yinni tugatish\n/all_team - Hamma jamoalarni ko'rish\n/create_team - Jamoa qo'shish haqida ma'lumot\n/add_team:Text.Text.Text.Text - Jamoa qo'shish\n/del_team:ID - Jamoani o'chirish\n/team:Text:ID - Jamoani ko'rish",
+        "*Hamma buyruqlar⤵️:\n\n/games - Tugatilmagan o'yinlarni ko'rish uchun\n/create_game - O'yin yaratish uchun ma'lumotlar\n/add_game:ID:ID - O'yin qo'shish uchun\n/game:Team🆚Team:ID - 1ta o'yinni ko'rish uchun\n/result:ID:Number:Number:Number:Number:Number:Number - natijalarni kiritish\n/end:ID - O'yinni tugatish\n/all_team - Hamma jamoalarni ko'rish\n/create_team - Jamoa qo'shish haqida ma'lumot\n/add_team:Text.Text.Text.Text - Jamoa qo'shish\n/del_team:ID - Jamoani o'chirish\n/team:Text:ID - Jamoani ko'rish*",
         {
           parse_mode: "Markdown",
         }
