@@ -501,13 +501,6 @@ bot.on("message", async (msg) => {
         );
       }
     }
-  } else {
-    if (chatId !== groupId) {
-      bot.sendMessage(
-        chatId,
-        "Sizda botdan to'laqonli foydalanish uchun ruxsat yo'q. ruhsat olish uchun @Gafurov_Abdurasul va @onehand_1 ga murojaat qiling."
-      );
-    }
   }
 });
 
