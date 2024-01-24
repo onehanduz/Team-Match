@@ -132,6 +132,15 @@ bot.on("message", async (msg) => {
           );
           let gamess = "🧠*O'yin*: \n\n";
           if (text_clear[3] == "7") {
+            let game1 = dicepRandom();
+            let game2 = dicepRandom(game1);
+            let game3 = dicepRandom(game1, game2);
+            let game4 = dicepRandom(game1);
+            let game5 = dicepRandom(game2);
+            let game6 = dicepRandom(game3);
+            let game7 = dicepRandom(game1, game4);
+            let game8 = dicepRandom(game2, game5);
+            let game9 = dicepRandom(game3, game6);
             gamess =
               gamess +
               "*1." +
@@ -139,69 +148,61 @@ bot.on("message", async (msg) => {
               " 🆚 " +
               query_team2.rows[0].player1 +
               " " +
-              diceplines[Math.floor(Math.random() * 6)] +
+              diceplines[game1] +
               "\n2." +
               query_team1.rows[0].player1 +
               " 🆚 " +
               query_team2.rows[0].player2 +
               " " +
-              diceplines[Math.floor(Math.random() * 6)] +
+              diceplines[game2] +
               "\n3." +
               query_team1.rows[0].player1 +
               " 🆚 " +
               query_team2.rows[0].player3 +
               " " +
-              diceplines[Math.floor(Math.random() * 6)] +
+              diceplines[game3] +
               "\n4." +
               query_team1.rows[0].player2 +
               " 🆚 " +
               query_team2.rows[0].player1 +
               " " +
-              diceplines[Math.floor(Math.random() * 6)] +
+              diceplines[game4] +
               "\n5." +
               query_team1.rows[0].player2 +
               " 🆚 " +
               query_team2.rows[0].player2 +
               " " +
-              diceplines[Math.floor(Math.random() * 6)] +
+              diceplines[game5] +
               "\n6." +
               query_team1.rows[0].player2 +
               " 🆚 " +
               query_team2.rows[0].player3 +
               " " +
-              diceplines[Math.floor(Math.random() * 6)] +
+              diceplines[game6] +
               "\n7." +
               query_team1.rows[0].player3 +
               " 🆚 " +
               query_team2.rows[0].player1 +
               " " +
-              diceplines[Math.floor(Math.random() * 6)] +
+              diceplines[game7] +
               "\n8." +
               query_team1.rows[0].player3 +
               " 🆚 " +
               query_team2.rows[0].player2 +
               " " +
-              diceplines[Math.floor(Math.random() * 6)] +
+              diceplines[game8] +
               "\n9." +
               query_team1.rows[0].player3 +
               " 🆚 " +
               query_team2.rows[0].player3 +
               " " +
-              diceplines[Math.floor(Math.random() * 6)] +
+              diceplines[game9] +
               "\n" +
               "*";
           }
-          if (chatId == groupId) {
-            bot.sendMessage(chatId, gamess, {
-              parse_mode: "Markdown",
-            });
-          } else {
-            let games = getAllGames(pool);
-            bot.sendMessage(chatId, gamess, {
-              reply_markup: { keyboard: await games, resize_keyboard: true },
-              parse_mode: "Markdown",
-            });
-          }
+          bot.sendMessage(chatId, gamess, {
+            parse_mode: "Markdown",
+          });
         } else {
           if (chatId == groupId) {
             bot.sendMessage(chatId, "❌*Bunday jamoalar topilmadi.*", {
@@ -489,3 +490,9 @@ const calculateResult = async (point) => {
     return null;
   }
 };
+function dicepRandom(old, old_old) {
+  if (old == null) old = 10;
+  if (old_old == null) old_old = 10;
+  let num = Math.floor(Math.random() * 6);
+  return num == old || num == old_old ? dicepRandom(old, old_old) : num;
+}
