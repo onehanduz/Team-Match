@@ -5,14 +5,12 @@ const exec = require("child_process").exec;
 
 let {
   main,
-  cancel,
   diceplines,
   getAllTeam,
   getAllGames,
 } = require("./src/key/keyArray");
 const token = process.env.BOT_TOKEN;
 const pool = require("./src/db");
-const { dir } = require("console");
 const bot = new TelegramBot(token, { polling: true });
 
 bot.on("message", async (msg) => {
